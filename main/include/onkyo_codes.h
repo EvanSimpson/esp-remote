@@ -1,0 +1,21 @@
+#include "esp_system.h"
+
+typedef enum {
+  ONKYO_PRE_DATA=0x4B,
+  ONKYO_KEY_POWER=0xB620DF,
+  ONKYO_KEY_DVD=0x3631CE,
+  ONKYO_KEY_CD=0xB6906F,
+  ONKYO_KEY_VOLUMEUP=0xB640BF,
+  ONKYO_KEY_VOLUMEDOWN=0xB6C03F
+} onkyo_code_t;
+
+typedef enum {
+  ONKYO_HEADER_DURATION=9010,
+  ONKYO_HEADER_SPACE_DURATION=4438,
+  ONKYO_ON_DURATION=593,
+  ONKYO_ONE_OFF_DURATION=1647,
+  ONKYO_ZERO_OFF_DURATION=527,
+  ONKYO_REPEAT_DURATION=2207
+} onkyo_durations_t;
+
+void get_onkyo_code(onkyo_code_t command_code, uint16_t *durations);
