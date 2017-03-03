@@ -20,4 +20,7 @@ Much of this code is based on [examples](https://github.com/espressif/esp-idf/tr
 | G2 | IO 18 |
 | G3 | IO 5 |
 
+## GATT attributes
+There is one GATT service with the UUID `CFFBCCBA-E23B-4E6C-B5D8-73D97BFF0000`, and that service has one characteristic with the UUID `CFFBCCBA-E23B-4E6C-B5D8-73D97BFF1000`.
+
 For help getting the ESP32 Thing set up, see the getting started guide [here](https://github.com/tessel/reach-wg/tree/master/firmware-esp32).
