@@ -1,12 +1,23 @@
-ESP-IDF template app
+ESP-32 / Tessel IR Remote
 ====================
 
-This is a template application to be used with `Espressif IoT Development Framework`_ (ESP-IDF). 
+This is a work in-progress IR remote that currently serves as a case study for development of the [Reach open source project](https://github.com/tessel/reach-wg).
+To get up and running with this project, you'll need an ESP32 Thing dev board from Sparkfun and a Tessel IR module.
 
-Please check ESP-IDF docs for getting started instructions.
+Much of this code is based on [examples](https://github.com/espressif/esp-idf/tree/master/examples) provided by Espressif.
 
-Code in this repository is Copyright (C) 2016 Espressif Systems, licensed under the Apache License 2.0 as described in the file LICENSE.
+## Hookup Guide
+| IR Module | ESP32 Thing |
+| --------- | ----------- |
+| GND | GND |
+| 3.3v | 3.3v |
+| SCL | N/A |
+| SDA | N/A |
+| SCK | IO 19 |
+| MISO | IO 25 |
+| MOSI | IO 23 |
+| G1 | IO 22 |
+| G2 | IO 18 |
+| G3 | IO 5 |
 
-.. _Espressif IoT Development Framework: https://github.com/espressif/esp-idf
-
-
+For help getting the ESP32 Thing set up, see the getting started guide [here](https://github.com/tessel/reach-wg/tree/master/firmware-esp32).
