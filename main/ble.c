@@ -18,17 +18,23 @@
 
 #define GATTS_TAG "GATTS_DEMO"
 
+#define GATTS_NUM_HANDLE_TEST_A 4
+
+#define DEVICE_NAME "ESP_REMOTE"
+
+#define GATTS_DEMO_CHAR_VAL_LEN_MAX 0x40
+
 ///Declare the static function
 static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
 
-#define GATTS_SERVICE_UUID_TEST_A   0x00FF
-#define GATTS_CHAR_UUID_TEST_A      0xFF01
-#define GATTS_DESCR_UUID_TEST_A     0x3333
-#define GATTS_NUM_HANDLE_TEST_A     4
-
-#define DEVICE_NAME            "ESP_REMOTE"
-
-#define GATTS_DEMO_CHAR_VAL_LEN_MAX 0x40
+static uint8_t service_uuid[16] = {
+  0x00, 0x00, 0xFF, 0x7B, 0xD9, 0x73, 0xD8, 0xB5,
+  0x6C, 0x4E, 0x3B, 0xE2, 0xBA, 0xCC, 0xFB, 0xCF
+};
+static uint8_t char_uuid[16] = {
+  0x00, 0x10, 0xFF, 0x7B, 0xD9, 0x73, 0xD8, 0xB5,
+  0x6C, 0x4E, 0x3B, 0xE2, 0xBA, 0xCC, 0xFB, 0xCF
+};
 
 uint8_t char1_str[] = {0x11,0x22,0x33};
 esp_attr_value_t gatts_demo_char1_val =
@@ -36,14 +42,6 @@ esp_attr_value_t gatts_demo_char1_val =
     .attr_max_len = GATTS_DEMO_CHAR_VAL_LEN_MAX,
     .attr_len     = sizeof(char1_str),
     .attr_value   = char1_str,
-};
-
-static uint8_t test_service_uuid128[32] = {
-    // LSB <-----------------> MSB
-    // first uuid, 16bit, [12],[13] is the value
-    0xfb, 0x34, 0x9b, 0x5f, 0x80, 0x00, 0x00, 0x80, 0x00, 0x10, 0x00, 0x00, 0xAB, 0xCD, 0x00, 0x00,
-    //second uuid, 32bit, [12], [13], [14], [15] is the value
-    0xfb, 0x34, 0x9b, 0x5f, 0x80, 0x00, 0x00, 0x80, 0x00, 0x10, 0x00, 0x00, 0xAB, 0xCD, 0xAB, 0xCD,
 };
 
 static esp_ble_adv_data_t test_adv_data = {
@@ -57,8 +55,8 @@ static esp_ble_adv_data_t test_adv_data = {
     .p_manufacturer_data =  NULL,
     .service_data_len = 0,
     .p_service_data = NULL,
-    .service_uuid_len = 32,
-    .p_service_uuid = test_service_uuid128,
+    .service_uuid_len = 16,
+    .p_service_uuid = service_uuid,
     .flag = (ESP_BLE_ADV_FLAG_GEN_DISC | ESP_BLE_ADV_FLAG_BREDR_NOT_SPT),
 };
 
@@ -139,8 +137,13 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
         ESP_LOGI(GATTS_TAG, "REGISTER_APP_EVT, status %d, app_id %d\n", param->reg.status, param->reg.app_id);
         gl_profile_tab[PROFILE_A_APP_ID].service_id.is_primary = true;
         gl_profile_tab[PROFILE_A_APP_ID].service_id.id.inst_id = 0x00;
-        gl_profile_tab[PROFILE_A_APP_ID].service_id.id.uuid.len = ESP_UUID_LEN_16;
-        gl_profile_tab[PROFILE_A_APP_ID].service_id.id.uuid.uuid.uuid16 = GATTS_SERVICE_UUID_TEST_A;
+        gl_profile_tab[PROFILE_A_APP_ID].service_id.id.uuid.len =
+          ESP_UUID_LEN_128;
+        memcpy(
+          gl_profile_tab[PROFILE_A_APP_ID].service_id.id.uuid.uuid.uuid128,
+          service_uuid,
+          sizeof(service_uuid)
+        );
 
         esp_ble_gap_set_device_name(DEVICE_NAME);
         esp_ble_gap_config_adv_data(&test_adv_data);
@@ -187,9 +190,12 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
           param->create.status, param->create.service_handle);
         gl_profile_tab[PROFILE_A_APP_ID].service_handle =
           param->create.service_handle;
-        gl_profile_tab[PROFILE_A_APP_ID].char_uuid.len = ESP_UUID_LEN_16;
-        gl_profile_tab[PROFILE_A_APP_ID].char_uuid.uuid.uuid16 =
-          GATTS_CHAR_UUID_TEST_A;
+        gl_profile_tab[PROFILE_A_APP_ID].char_uuid.len = ESP_UUID_LEN_128;
+        memcpy(
+          gl_profile_tab[PROFILE_A_APP_ID].char_uuid.uuid.uuid128,
+          char_uuid,
+          sizeof(char_uuid)
+        );
 
         esp_ble_gatts_start_service(
             gl_profile_tab[PROFILE_A_APP_ID].service_handle);
