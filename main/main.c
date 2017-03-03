@@ -10,6 +10,7 @@
 
 #include "include/ir_attx4.h"
 #include "include/onkyo_codes.h"
+#include "include/ble.h"
 
 // Setup pins for SPI output
 #define PIN_NUM_MISO 25
@@ -23,6 +24,8 @@
 // Only need it for RX IR data
 #define PIN_NUM_IRQ 5
 
+spi_device_handle_t spi;
+
 void sendStereoCommand(spi_device_handle_t spi, onkyo_code_t command)
 {
   // Create an IR remote command packet
@@ -33,10 +36,41 @@ void sendStereoCommand(spi_device_handle_t spi, onkyo_code_t command)
   ir_tx(spi, durations_buff, 140);
 }
 
+void ble_write_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param)
+{
+  // Send a test command to the stereo
+  uint32_t read_value = 0;
+  for (int i=0; i<param->write.len; i++) {
+    read_value = read_value |
+      // flip the value array around
+      ( param->write.value[i] << ((param->write.len - i - 1) * 8) );
+  }
+
+  switch (read_value) {
+    case ONKYO_KEY_POWER:
+      sendStereoCommand(spi, ONKYO_KEY_POWER);
+      break;
+    case ONKYO_KEY_DVD:
+      sendStereoCommand(spi, ONKYO_KEY_DVD);
+      break;
+    case ONKYO_KEY_CD:
+      sendStereoCommand(spi, ONKYO_KEY_CD);
+      break;
+    case ONKYO_KEY_VOLUMEUP:
+      sendStereoCommand(spi, ONKYO_KEY_VOLUMEUP);
+      break;
+    case ONKYO_KEY_VOLUMEDOWN:
+      sendStereoCommand(spi, ONKYO_KEY_VOLUMEDOWN);
+      break;
+    default:
+      return;
+  }
+  printf("Packet sent.\n");
+}
+
 void app_main(void)
 {
   esp_err_t ret;
-  spi_device_handle_t spi;
   // Configure the spi bus and device settings
   spi_bus_config_t buscfg={
     .miso_io_num=PIN_NUM_MISO,
@@ -61,7 +95,6 @@ void app_main(void)
   //Initialize the IR module
   ir_init(spi, PIN_NUM_RST);
 
-  // Send a test command to the stereo
-  sendStereoCommand(spi, ONKYO_KEY_VOLUMEUP);
-  printf("Packet sent.\n");
+  // Start up the GATTS server
+  ble_start(ble_write_event_handler);
 }
